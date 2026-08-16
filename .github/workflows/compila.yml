@@ -1,4 +1,4 @@
-name: Compila Firmware Lilygo Corretto
+name: Compila Bruce per T-Dongle S3
 
 on:
   workflow_dispatch:
@@ -16,20 +16,19 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Installa PlatformIO e librerie sistema
+      - name: Installa PlatformIO
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade platformio
 
-      - name: Configurazione dipendenze Bruce
+      - name: Patch forzata platformio.ini
         run: |
-          chmod +x deauth_setup.sh
-          bash deauth_setup.sh
+          echo -e "\n[env:lilygo-t-dongle-s3]\nextends = esp32s3\nboard = esp32s3box\nboard_build.partitions = default_16MB.csv\nbuild_flags =\n    \${esp32s3.build_flags}\n    -D LILYGO_T_DONGLE_S3\n    -D USER_SETUP_LOADED=1\n    -D ST7735_DRIVER=1\n    -D TFT_WIDTH=80\n    -D TFT_HEIGHT=160\n    -D ST7735_GREENTAB160x80=1\n    -D TFT_MOSI=11\n    -D TFT_SCLK=12\n    -D TFT_CS=10\n    -D TFT_DC=4\n    -D TFT_RST=5\n    -D TFT_BL=38\n    -D TFT_BACKLIGHT_ON=HIGH\n    -D BUTTON_PIN=0\n    -D SINGLE_BUTTON_MODE=1" >> platformio.ini
 
-      - name: Esegui Compilazione T-Dongle S3
+      - name: Compilazione Firmware
         run: pio run -e lilygo-t-dongle-s3
 
-      - name: Salva il file BIN
+      - name: Salva il file BIN finale
         uses: actions/upload-artifact@v3
         with:
           name: Firmware-Lilygo-T-Dongle-S3
